@@ -5,6 +5,7 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack"
 import { useNavigation } from "@react-navigation/native"
 
 import { RootStackParamList } from "../navigation/types"
+import { useRideStore } from "../store/rideStore"
 
 type NavigationProp = NativeStackNavigationProp<
   RootStackParamList,
@@ -15,6 +16,7 @@ export default function HomeScreen() {
 
   const navigation = useNavigation<NavigationProp>()
   const [roomId, setRoomId] = useState("")
+  const localRiderId = useRideStore((state) => state.localRiderId)
 
   const joinRide = () => {
     
@@ -23,7 +25,7 @@ export default function HomeScreen() {
 
     navigation.navigate("RideRoom", {
       roomId: finalRoomId,
-      riderId: "userABC"
+      riderId: localRiderId
     })
 
   }
@@ -35,6 +37,19 @@ export default function HomeScreen() {
       <View className="absolute -top-32 -left-32 w-96 h-96 bg-indigo-600/20 rounded-full blur-3xl opacity-50" />
       <View className="absolute -bottom-32 -right-32 w-96 h-96 bg-indigo-600/10 rounded-full blur-3xl opacity-30" />
 
+      {/* Top Header Row with Settings Icon */}
+      <View className="absolute top-14 right-5 z-50">
+        <Pressable 
+          onPress={() => navigation.navigate("Settings")}
+          className="w-11 h-11 rounded-full items-center justify-center bg-zinc-900 border border-zinc-800"
+        >
+          {/* simple hamburger/settings lines */}
+          <View className="w-5 h-0.5 bg-white mb-1" />
+          <View className="w-5 h-0.5 bg-white mb-1" />
+          <View className="w-5 h-0.5 bg-white" />
+        </Pressable>
+      </View>
+
       <SafeAreaView className="flex-1">
         <View className="flex-1 px-6 justify-center">
           
@@ -42,7 +57,7 @@ export default function HomeScreen() {
           <View className="items-center mb-16">
             <View className="bg-indigo-500/10 border border-indigo-500/20 px-5 py-2 rounded-full mb-6">
               <Text className="text-indigo-400 font-semibold tracking-widest text-xs uppercase shadow-indigo-500/50">
-                Live GPS Tracking
+                Sync Your Drive
               </Text>
             </View>
 

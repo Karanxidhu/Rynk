@@ -4,4 +4,5 @@ export type RootStackParamList = {
     roomId: string
     riderId: string
   }
+  Settings: undefined
 }

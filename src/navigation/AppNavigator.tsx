@@ -4,6 +4,7 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack"
 
 import HomeScreen from "../screens/HomeScreen"
 import RideRoomScreen from "../screens/RideRoomScreen"
+import SettingsScreen from "../screens/SettingsScreen"
 
 import { RootStackParamList } from "./types"
 
@@ -28,6 +29,11 @@ export default function AppNavigator() {
         <Stack.Screen
           name="RideRoom"
           component={RideRoomScreen}
+        />
+
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
         />
 
       </Stack.Navigator>
