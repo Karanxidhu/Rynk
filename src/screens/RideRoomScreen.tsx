@@ -231,7 +231,7 @@ export default function RideRoomScreen({ route }: Props) {
       {/* Back Button */}
       <Pressable
         onPress={() => navigation.goBack()}
-        className="absolute top-14 left-5 z-50 bg-zinc-900/90 border border-zinc-800 w-11 h-11 rounded-full items-center justify-center"
+        className="absolute top-14 left-5 z-50 w-10 h-10 items-center justify-center rounded-full bg-zinc-900 active:bg-zinc-800"
       >
         <Text className="text-white text-lg font-bold">←</Text>
       </Pressable>
