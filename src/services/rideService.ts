@@ -1,5 +1,5 @@
 import { io, Socket } from "socket.io-client"
-import { API_BASE_URL } from "@env"
+import { getApiBaseUrl } from "../config/api"
 
 export type RiderLocation = {
   riderId: string
@@ -16,7 +16,7 @@ let socket: Socket | null = null
  * REST: Fetch all riders currently in a room from Redis store
  */
 export async function fetchRoomRiders(roomId: string): Promise<RiderLocation[]> {
-  const res = await fetch(`${API_BASE_URL}/room/${roomId}`)
+  const res = await fetch(`${getApiBaseUrl()}/room/${roomId}`)
   if (!res.ok) throw new Error(`Failed to fetch riders: ${res.status}`)
   return res.json()
 }
@@ -33,7 +33,7 @@ export function connectToRoom(
     socket.disconnect()
   }
 
-  socket = io(API_BASE_URL, { transports: ["websocket"] })
+  socket = io(getApiBaseUrl(), { transports: ["websocket"] })
 
   socket.on("connect", () => {
     console.log("[WS] Connected:", socket?.id)
