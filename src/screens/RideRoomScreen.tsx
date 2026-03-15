@@ -8,6 +8,7 @@ import Geolocation from "@react-native-community/geolocation"
 
 import { RootStackParamList } from "../navigation/types"
 import { useRideStore } from "../store/rideStore"
+import type { RiderLocation } from "../services/rideService"
 import { MAPBOX_ACCESS_TOKEN } from "@env"
 
 Mapbox.setAccessToken(MAPBOX_ACCESS_TOKEN)
@@ -41,7 +42,7 @@ function PulseMarker({ isLeader }: { isLeader?: boolean }) {
       -1,
       false
     )
-  }, [])
+  }, [opacity, scale])
 
   const animatedStyle = useAnimatedStyle(() => ({
     transform: [{ scale: scale.value }],
@@ -112,9 +113,11 @@ export default function RideRoomScreen({ route }: Props) {
       clearTimeout(timer)
       leaveRoom()
     }
-  }, [roomId])
+  }, [initRoom, leaveRoom, riderId, roomId, startLocationSharing])
 
-  const ridersList = Object.values(riders)
+  const ridersList: RiderLocation[] = Object.values(riders)
+  const me: RiderLocation | undefined = riders[riderId]
+  const leader: RiderLocation | undefined = leaderId ? riders[leaderId] : undefined
 
   // Real navigation route coordinates
   const [routeCoords, setRouteCoords] = useState<number[][] | null>(null)
@@ -127,9 +130,6 @@ export default function RideRoomScreen({ route }: Props) {
       return
     }
 
-    const me = riders[riderId]
-    const leader = riders[leaderId]
-    
     if (!me || !leader) return
 
     const fetchRoute = async () => {
@@ -152,7 +152,7 @@ export default function RideRoomScreen({ route }: Props) {
     }
 
     fetchRoute()
-  }, [leaderId, riders[riderId]?.lat, riders[riderId]?.lng, leaderId ? riders[leaderId]?.lat : undefined, leaderId ? riders[leaderId]?.lng : undefined])
+  }, [leader, leaderId, me, me?.lat, me?.lng, leader?.lat, leader?.lng])
 
   // Build the navigation line GeoJSON from the fetched route
   const navigationLine = useMemo(() => {
@@ -208,7 +208,6 @@ export default function RideRoomScreen({ route }: Props) {
   // Trigger camera reset animation when navigation is turned off
   useEffect(() => {
     if (!isNavigating && initialCenter) {
-      const me = riders[riderId]
       const targetCenter = me ? [me.lng, me.lat] : initialCenter
       
       // Short delay allows the native module to process the followUserLocation disable
@@ -224,7 +223,7 @@ export default function RideRoomScreen({ route }: Props) {
         })
       }, 100)
     }
-  }, [isNavigating])
+  }, [initialCenter, isNavigating, me, me?.lat, me?.lng])
 
   return (
     <View className="flex-1 bg-zinc-950">
@@ -307,7 +306,7 @@ export default function RideRoomScreen({ route }: Props) {
           followUserMode={isNavigating ? Mapbox.UserTrackingMode.FollowWithCourse : undefined}
           followZoomLevel={isNavigating ? 17.5 : undefined}
           followPitch={isNavigating ? 60 : undefined}
-          onUserTrackingModeChange={(e) => {
+          onUserTrackingModeChange={(e: any) => {
             // Mapbox fires this when the user breaks the follow lock by panning
             if (!e.nativeEvent.payload.followUserLocation && isNavigating) {
               setIsNavigating(false)
@@ -331,7 +330,7 @@ export default function RideRoomScreen({ route }: Props) {
         )}
 
         {/* Rider markers */}
-        {ridersList.map((rider) => {
+        {ridersList.map((rider: RiderLocation) => {
           const isMe = rider.riderId === riderId
           const isLeader = rider.riderId === leaderId
           return (
@@ -413,15 +412,15 @@ export default function RideRoomScreen({ route }: Props) {
         </View>
 
         {/* Rider List */}
-        <FlatList
-          data={[...ridersList].sort((a, b) => {
+        <FlatList<RiderLocation>
+          data={[...ridersList].sort((a: RiderLocation, b: RiderLocation) => {
             if (a.riderId === riderId) return 1
             if (b.riderId === riderId) return -1
             return 0
           })}
           keyExtractor={(item) => item.riderId}
           className="px-5"
-          renderItem={({ item }) => {
+          renderItem={({ item }: { item: RiderLocation }) => {
             const isMe = item.riderId === riderId
             const isLeader = item.riderId === leaderId
             return (
